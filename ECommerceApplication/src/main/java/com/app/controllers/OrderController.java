@@ -2,16 +2,12 @@ package com.app.controllers;
 
 import java.util.List;
 
+import com.app.entites.Address;
+import com.app.payloads.AddressDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.app.config.AppConstants;
 import com.app.payloads.OrderDTO;
@@ -27,12 +23,15 @@ public class OrderController {
 	
 	@Autowired
 	public OrderService orderService;
-	
-	@PostMapping("/public/users/{email}/carts/{cartId}/payments/{paymentMethod}/order")
-	public ResponseEntity<OrderDTO> orderProducts(@PathVariable String email, @PathVariable Long cartId, @PathVariable String paymentMethod) {
-		OrderDTO order = orderService.placeOrder(email, cartId, paymentMethod);
-		
-		return new ResponseEntity<OrderDTO>(order, HttpStatus.CREATED);
+
+	@PostMapping("/public/users/{email}/carts/{cartId}/order")
+	public ResponseEntity<OrderDTO> orderProducts(
+			@PathVariable String email,
+			@PathVariable Long cartId,
+			@RequestBody(required = false) AddressDTO addressDTO
+	) {
+		OrderDTO order = orderService.placeOrder(email, cartId, addressDTO);
+		return new ResponseEntity<>(order, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/admin/orders")
