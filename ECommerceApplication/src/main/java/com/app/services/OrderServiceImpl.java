@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.app.entites.*;
+import com.app.payloads.AddressDTO;
+import com.app.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,23 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.app.entites.Cart;
-import com.app.entites.CartItem;
-import com.app.entites.Order;
-import com.app.entites.OrderItem;
-import com.app.entites.Payment;
-import com.app.entites.Product;
 import com.app.exceptions.APIException;
 import com.app.exceptions.ResourceNotFoundException;
 import com.app.payloads.OrderDTO;
 import com.app.payloads.OrderItemDTO;
 import com.app.payloads.OrderResponse;
-import com.app.repositories.CartItemRepo;
-import com.app.repositories.CartRepo;
-import com.app.repositories.OrderItemRepo;
-import com.app.repositories.OrderRepo;
-import com.app.repositories.PaymentRepo;
-import com.app.repositories.UserRepo;
 
 import jakarta.transaction.Transactional;
 
@@ -53,6 +44,9 @@ public class OrderServiceImpl implements OrderService {
 	public OrderItemRepo orderItemRepo;
 
 	@Autowired
+	private AddressRepo addressRepo;
+
+	@Autowired
 	public CartItemRepo cartItemRepo;
 
 	@Autowired
@@ -65,12 +59,17 @@ public class OrderServiceImpl implements OrderService {
 	public ModelMapper modelMapper;
 
 	@Override
-	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod) {
+	public OrderDTO placeOrder(String email, Long cartId, AddressDTO addressDTO) {
 
 		Cart cart = cartRepo.findCartByEmailAndCartId(email, cartId);
 
 		if (cart == null) {
 			throw new ResourceNotFoundException("Cart", "cartId", cartId);
+		}
+
+
+		if (addressDTO == null) {
+			throw new APIException("Address is required for COD payment.");
 		}
 
 		Order order = new Order();
@@ -81,9 +80,19 @@ public class OrderServiceImpl implements OrderService {
 		order.setTotalAmount(cart.getTotalPrice());
 		order.setOrderStatus("Order Accepted !");
 
+		Address address = new Address();
+		address.setStreet(addressDTO.getStreet());
+		address.setBuildingName(addressDTO.getBuildingName());
+		address.setCity(addressDTO.getCity());
+		address.setState(addressDTO.getState());
+		address.setCountry(addressDTO.getCountry());
+		address.setPincode(addressDTO.getPincode());
+
+		address = addressRepo.save(address);
+		order.setAddress(address);
+
 		Payment payment = new Payment();
 		payment.setOrder(order);
-		payment.setPaymentMethod(paymentMethod);
 
 		payment = paymentRepo.save(payment);
 

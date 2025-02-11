@@ -2,12 +2,14 @@ package com.app.services;
 
 import java.util.List;
 
+import com.app.entites.Address;
+import com.app.payloads.AddressDTO;
 import com.app.payloads.OrderDTO;
 import com.app.payloads.OrderResponse;
 
 public interface OrderService {
 	
-	OrderDTO placeOrder(String email, Long cartId, String paymentMethod);
+	OrderDTO placeOrder(String email, Long cartId, AddressDTO addressDTO);
 	
 	OrderDTO getOrder(String email, Long orderId);
 	
