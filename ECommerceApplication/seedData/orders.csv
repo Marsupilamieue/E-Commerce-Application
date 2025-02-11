@@ -1,0 +1,11 @@
+"order_id","email","order_date","order_status","total_amount","payment_id","address_id"
+"1","zhafir53@gmail.com","2025-02-09","complete","29.700000000000003","1",NULL
+"2","olivia.miller@example.com","2025-02-11","Order Accepted !","-3000","2",NULL
+"3","olivia.miller@example.com","2025-02-11","Order Accepted !","-6000","3",NULL
+"4","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","4",NULL
+"5","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","5",NULL
+"6","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","6",NULL
+"7","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","7",NULL
+"9","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","9",NULL
+"10","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","10",NULL
+"11","olivia.miller@example.com","2025-02-11","Order Accepted !","-20000","11",NULL
