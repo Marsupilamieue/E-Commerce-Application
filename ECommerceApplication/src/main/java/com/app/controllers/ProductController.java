@@ -33,10 +33,11 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 
-	@PostMapping("/admin/categories/{categoryId}/product")
-	public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody Product product, @PathVariable Long categoryId) {
+	@PostMapping("/admin/categories/{categoryId}/brands/{brandId}/product")
+	public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody Product product, @PathVariable Long categoryId
+												, @PathVariable Long brandId) {
 
-		ProductDTO savedProduct = productService.addProduct(categoryId, product);
+		ProductDTO savedProduct = productService.addProduct(categoryId, brandId, product);
 
 		return new ResponseEntity<ProductDTO>(savedProduct, HttpStatus.CREATED);
 	}
@@ -66,14 +67,14 @@ public class ProductController {
 		return new ResponseEntity<ProductResponse>(productResponse, HttpStatus.FOUND);
 	}
 
-	@GetMapping("/public/brand/{brandName}/products")
-	public ResponseEntity<ProductResponse> getProductsByBrand(@PathVariable String brandName,
+	@GetMapping("/public/brand/{brandId}/products")
+	public ResponseEntity<ProductResponse> getProductsByBrand(@PathVariable Long brandId,
 			 @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
 			 @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
 			 @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
 			 @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder) {
 
-		ProductResponse productResponse = productService.searchByBrand(brandName, pageNumber, pageSize, sortBy,
+		ProductResponse productResponse = productService.searchByBrand(brandId, pageNumber, pageSize, sortBy,
 				sortOrder);
 
 		return new ResponseEntity<ProductResponse>(productResponse, HttpStatus.FOUND);
