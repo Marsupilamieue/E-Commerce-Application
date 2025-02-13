@@ -34,10 +34,6 @@ public class Product {
 	@Size(min = 3, message = "Product name must contain atleast 3 characters")
 	private String productName;
 
-	@NotBlank
-	@Size(min = 3, message = "Brand name must contain atleast 3 characters")
-	private String brandName;
-
 	private String image;
 	
 	@NotBlank
@@ -52,6 +48,10 @@ public class Product {
 	@ManyToOne
 	@JoinColumn(name = "category_id")
 	private Category category;
+
+	@ManyToOne
+	@JoinColumn(name = "brand_id")
+	private Brand brand;
 	
 	@OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)
 	private List<CartItem> products = new ArrayList<>();
