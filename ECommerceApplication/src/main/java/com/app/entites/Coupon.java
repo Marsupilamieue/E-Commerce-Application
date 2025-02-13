@@ -34,4 +34,6 @@ public class Coupon {
 
     @OneToMany(mappedBy = "coupon", cascade =  CascadeType.ALL )
     private List<Product> products;
+
+    private double value;
 }
