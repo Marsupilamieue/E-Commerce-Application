@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.entites.Cart;
 import com.app.entites.CartItem;
+import com.app.entites.Coupon;
 import com.app.entites.Product;
 import com.app.exceptions.APIException;
 import com.app.exceptions.ResourceNotFoundException;
@@ -16,6 +17,7 @@ import com.app.payloads.CartDTO;
 import com.app.payloads.ProductDTO;
 import com.app.repositories.CartItemRepo;
 import com.app.repositories.CartRepo;
+import com.app.repositories.CouponRepo;
 import com.app.repositories.ProductRepo;
 
 import jakarta.transaction.Transactional;
@@ -34,10 +36,32 @@ public class CartServiceImpl implements CartService {
 	private CartItemRepo cartItemRepo;
 
 	@Autowired
+	private CouponRepo couponRepo;
+
+	@Autowired
 	private ModelMapper modelMapper;
 
+	private void setProductPrice(Product product, Long couponId) {
+		if (couponId != null) {
+			Coupon coupon = couponRepo.findById(couponId)
+					.orElseThrow(() -> new ResourceNotFoundException("Coupon", "couponId", couponId));
+
+			List<Coupon> coupons = product.getCoupons();
+
+			boolean hasCoupon = coupons.stream().anyMatch(c -> c.getCouponId().equals(couponId));
+
+			if (!hasCoupon) {
+				throw new APIException("Product '" + product.getProductName() + "' does not have the applied coupon.");
+			}
+
+			product.setPrice(Math.max(0, product.getPrice() - coupon.getValue()));
+			product.setSpecialPrice(Math.max(0, product.getSpecialPrice() - coupon.getValue()));
+		}
+	}
+
+
 	@Override
-	public CartDTO addProductToCart(Long cartId, Long productId, Integer quantity) {
+	public CartDTO addProductToCart(Long cartId, Long productId, Long couponId, Integer quantity) {
 
 		Cart cart = cartRepo.findById(cartId)
 				.orElseThrow(() -> new ResourceNotFoundException("Cart", "cartId", cartId));
@@ -59,6 +83,8 @@ public class CartServiceImpl implements CartService {
 			throw new APIException("Please, make an order of the " + product.getProductName()
 					+ " less than or equal to the quantity " + product.getQuantity() + ".");
 		}
+
+		setProductPrice(product, couponId);
 
 		CartItem newCartItem = new CartItem();
 

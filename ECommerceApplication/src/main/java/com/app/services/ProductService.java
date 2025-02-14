@@ -10,11 +10,21 @@ import com.app.payloads.ProductResponse;
 
 public interface ProductService {
 
-	ProductDTO addProduct(Long categoryId, Product product);
+	ProductDTO addProduct(Long categoryId, Long brandId, Product product);
+
+	String applyCoupon(Long productId, Long couponId);
+
+	ProductDTO removeCoupon(Long productId, Long couponId);
 
 	ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
 	ProductResponse searchByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy,
+			String sortOrder);
+
+	ProductResponse searchByBrand(Long brandId, Integer pageNumber, Integer pageSize, String sortBy,
+			String sortOrder);
+
+	ProductResponse searchByCoupon(Long couponId, Integer pageNumber, Integer pageSize, String sortBy,
 			String sortOrder);
 
 	ProductDTO updateProduct(Long productId, Product product);
