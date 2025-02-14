@@ -28,7 +28,7 @@ public class OrderController {
 	public ResponseEntity<OrderDTO> orderProducts(
 			@PathVariable String email,
 			@PathVariable Long cartId,
-			@RequestBody(required = false) AddressDTO addressDTO
+			@RequestBody(required = true) AddressDTO addressDTO
 	) {
 		OrderDTO order = orderService.placeOrder(email, cartId, addressDTO);
 		return new ResponseEntity<>(order, HttpStatus.CREATED);
