@@ -12,7 +12,7 @@ public interface ProductService {
 
 	ProductDTO addProduct(Long categoryId, Long brandId, Product product);
 
-	ProductDTO applyCoupon(Long productId, Long couponId);
+	String applyCoupon(Long productId, Long couponId);
 
 	ProductDTO removeCoupon(Long productId, Long couponId);
 

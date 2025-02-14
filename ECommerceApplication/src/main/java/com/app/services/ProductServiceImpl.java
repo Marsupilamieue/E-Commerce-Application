@@ -252,7 +252,7 @@ public class ProductServiceImpl implements ProductService {
 
 		Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
 
-		Page<Product> pageProducts = productRepo.findByCoupon(coupon, pageDetails);
+		Page<Product> pageProducts = productRepo.findByCoupons(coupon, pageDetails);;
 
 		List<Product> products = pageProducts.getContent();
 
@@ -346,7 +346,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ProductDTO applyCoupon(Long productId, Long couponId) {
+	public String applyCoupon(Long productId, Long couponId) {
 		Product product = productRepo.findById(productId)
 				.orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
@@ -358,7 +358,7 @@ public class ProductServiceImpl implements ProductService {
 
 		Product savedProduct = productRepo.save(product);
 
-		return modelMapper.map(savedProduct, ProductDTO.class);
+		return "Coupon " + coupon.getCouponName() + " has been applied to " + productId;
 	}
 
 	@Override

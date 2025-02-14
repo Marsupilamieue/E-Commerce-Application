@@ -19,5 +19,5 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
 
     Page<Product> findByBrand(Brand brand, Pageable pageDetails);
 
-    Page<Product> findByCoupon(Coupon coupon, Pageable pageable);
+    Page<Product> findByCoupons(Coupon coupon, Pageable pageDetails);
 }

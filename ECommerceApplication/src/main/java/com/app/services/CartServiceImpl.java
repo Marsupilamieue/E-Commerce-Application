@@ -48,15 +48,17 @@ public class CartServiceImpl implements CartService {
 
 			List<Coupon> coupons = product.getCoupons();
 
-			for (Coupon c : coupons) {
-				if (c.getCouponId() == couponId) {
-					product.setPrice(product.getPrice() - coupon.getValue());
-					product.setSpecialPrice(product.getSpecialPrice() - coupon.getValue());
-					break;
-				}
+			boolean hasCoupon = coupons.stream().anyMatch(c -> c.getCouponId().equals(couponId));
+
+			if (!hasCoupon) {
+				throw new APIException("Product '" + product.getProductName() + "' does not have the applied coupon.");
 			}
+
+			product.setPrice(Math.max(0, product.getPrice() - coupon.getValue()));
+			product.setSpecialPrice(Math.max(0, product.getSpecialPrice() - coupon.getValue()));
 		}
 	}
+
 
 	@Override
 	public CartDTO addProductToCart(Long cartId, Long productId, Long couponId, Integer quantity) {

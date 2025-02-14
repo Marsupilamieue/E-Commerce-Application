@@ -57,7 +57,7 @@ public class Product {
 
 	@ManyToMany
 	@JoinTable(name = "coupon_product", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "coupon_id"))
-	private List<Coupon> coupons;
+	private List<Coupon> coupons = new ArrayList<>();
 
 	@OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)
 	private List<CartItem> products = new ArrayList<>();

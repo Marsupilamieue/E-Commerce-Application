@@ -1,5 +1,6 @@
 package com.app.entites;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -35,9 +36,8 @@ public class Coupon {
     @Size(min = 6, message = "Coupon description must contain at least 6 characters")
     private String description;
 
-    @ManyToMany
-    @JoinTable(name = "coupon_product", joinColumns = @JoinColumn(name = "coupon_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
-    private List<Product> products;
+    @ManyToMany(mappedBy = "coupons")
+    private List<Product> products = new ArrayList<>();
     
     private double value;
 }
