@@ -35,11 +35,11 @@ public class Product {
 	private String productName;
 
 	private String image;
-	
+
 	@NotBlank
 	@Size(min = 6, message = "Product description must contain atleast 6 characters")
 	private String description;
-	
+
 	private Integer quantity;
 	private double price;
 	private double discount;
@@ -52,11 +52,14 @@ public class Product {
 	@ManyToOne
 	@JoinColumn(name = "brand_id")
 	private Brand brand;
-	
+
+	@ManyToOne
+	@JoinColumn(name = "coupon_id")
+	private Coupon coupon;
+
 	@OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)
 	private List<CartItem> products = new ArrayList<>();
-	
+
 	@OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	private List<OrderItem> orderItems = new ArrayList<>();
-
 }

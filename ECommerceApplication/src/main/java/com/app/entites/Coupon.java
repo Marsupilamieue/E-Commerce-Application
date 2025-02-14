@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,21 +19,22 @@ import lombok.NoArgsConstructor;
 @Table(name = "coupon")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Coupon {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long couponId;
 
     @NotBlank
-    @Size(min = 3, message = "Coupon name must contain atleast 3 characters")
+    @Size(min = 3, message = "Coupon name must contain at least 3 characters")
     private String couponName;
 
     @NotBlank
-    @Size(min = 6, message = "Coupon description must contain atleast 6 characters")
+    @Size(min = 6, message = "Coupon description must contain at least 6 characters")
     private String description;
 
-    @OneToMany(mappedBy = "coupon", cascade =  CascadeType.ALL )
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL)
     private List<Product> products;
 
     private double value;
