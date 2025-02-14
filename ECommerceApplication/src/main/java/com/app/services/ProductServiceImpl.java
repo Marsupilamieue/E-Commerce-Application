@@ -288,6 +288,14 @@ public class ProductServiceImpl implements ProductService {
 		product.setProductId(productId);
 		product.setCategory(productFromDB.getCategory());
 
+		if (product.getBrand() != null && product.getBrand().getBrandId() != null) {
+			Brand brand = brandRepo.findById(product.getBrand().getBrandId())
+					.orElseThrow(() -> new ResourceNotFoundException("Brand", "brandId", product.getBrand().getBrandId()));
+			product.setBrand(brand);
+		} else {
+			product.setBrand(productFromDB.getBrand()); // Jika tidak ada perubahan, tetap gunakan brand yang lama
+		}
+
 		double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
 		product.setSpecialPrice(specialPrice);
 
@@ -307,9 +315,11 @@ public class ProductServiceImpl implements ProductService {
 
 		}).collect(Collectors.toList());
 
-		cartDTOs.forEach(cart -> cartService.updateProductInCarts(cart.getCartId(), productId));
+		ProductDTO productDTO = modelMapper.map(savedProduct, ProductDTO.class);
 
-		return modelMapper.map(savedProduct, ProductDTO.class);
+		productDTO.setBrandName(savedProduct.getBrand() != null ? savedProduct.getBrand().getBrandName() : "No Brand");
+
+		return productDTO;
 	}
 
 	@Override
