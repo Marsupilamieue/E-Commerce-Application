@@ -2,12 +2,13 @@ package com.app.entites;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -34,8 +35,9 @@ public class Coupon {
     @Size(min = 6, message = "Coupon description must contain at least 6 characters")
     private String description;
 
-    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(name = "coupon_product", joinColumns = @JoinColumn(name = "coupon_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> products;
-
+    
     private double value;
 }

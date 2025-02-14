@@ -345,4 +345,36 @@ public class ProductServiceImpl implements ProductService {
 		return "Product with productId: " + productId + " deleted successfully !!!";
 	}
 
+	@Override
+	public ProductDTO applyCoupon(Long productId, Long couponId) {
+		Product product = productRepo.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+		Coupon coupon = couponRepo.findById(couponId)
+				.orElseThrow(() -> new ResourceNotFoundException("Coupon", "couponId", couponId));
+
+		product.getCoupons().add(coupon);
+		coupon.getProducts().add(product);
+
+		Product savedProduct = productRepo.save(product);
+
+		return modelMapper.map(savedProduct, ProductDTO.class);
+	}
+
+	@Override
+	public ProductDTO removeCoupon(Long productId, Long couponId) {
+		Product product = productRepo.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+		Coupon coupon = couponRepo.findById(couponId)
+				.orElseThrow(() -> new ResourceNotFoundException("Coupon", "couponId", couponId));
+
+		product.getCoupons().remove(coupon);
+		coupon.getProducts().remove(product);
+
+		Product savedProduct = productRepo.save(product);
+
+		return modelMapper.map(savedProduct, ProductDTO.class);
+	}
+	
 }

@@ -115,4 +115,17 @@ public class ProductController {
 		return new ResponseEntity<String>(status, HttpStatus.OK);
 	}
 
+	@PostMapping("/admin/products/{productId}/coupon/{couponId}")
+	public ResponseEntity<ProductDTO> applyCoupon(@PathVariable Long productId, @PathVariable Long couponId) {
+		ProductDTO updatedProduct = productService.applyCoupon(productId, couponId);
+
+		return new ResponseEntity<ProductDTO>(updatedProduct, HttpStatus.OK);
+	}
+
+	@DeleteMapping("/admin/products/{productId}/coupon/{couponId}")
+	public ResponseEntity<ProductDTO> removeCoupon(@PathVariable Long productId, @PathVariable Long couponId) {
+		ProductDTO updatedProduct = productService.removeCoupon(productId, couponId);
+
+		return new ResponseEntity<ProductDTO>(updatedProduct, HttpStatus.OK);
+	}
 }

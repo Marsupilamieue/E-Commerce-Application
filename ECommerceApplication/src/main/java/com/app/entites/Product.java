@@ -10,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -53,13 +55,14 @@ public class Product {
 	@JoinColumn(name = "brand_id")
 	private Brand brand;
 
-	@ManyToOne
-	@JoinColumn(name = "coupon_id")
-	private Coupon coupon;
+	@ManyToMany
+	@JoinTable(name = "coupon_product", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "coupon_id"))
+	private List<Coupon> coupons;
 
 	@OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER)
 	private List<CartItem> products = new ArrayList<>();
 
 	@OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	private List<OrderItem> orderItems = new ArrayList<>();
+	
 }
