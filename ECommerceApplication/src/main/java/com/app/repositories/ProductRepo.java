@@ -13,5 +13,9 @@ import com.app.entites.Product;
 public interface ProductRepo extends JpaRepository<Product, Long> {
 
 	Page<Product> findByProductNameLike(String keyword, Pageable pageDetails);
-  Page<Product> findByCategory(Category category, Pageable pageDetails);
+    Page<Product> findByCategory(Category category, Pageable pageDetails);
+    Page<Product> findByPriceBetween(Double minPrice, Double maxPrice, Pageable pageable);
+    Page<Product> findByPriceGreaterThanEqual(Double minPrice, Pageable pageable);
+    Page<Product> findByPriceLessThanEqual(Double maxPrice, Pageable pageable);
+
 }

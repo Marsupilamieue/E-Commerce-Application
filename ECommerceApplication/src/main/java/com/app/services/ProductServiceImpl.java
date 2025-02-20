@@ -89,18 +89,26 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+	public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, Double minPrice, Double maxPrice) {
 
 		Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending()
 				: Sort.by(sortBy).descending();
 
 		Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
 
-		Page<Product> pageProducts = productRepo.findAll(pageDetails);
+		Page<Product> pageProducts;
 
-		List<Product> products = pageProducts.getContent();
+		if (minPrice != null && maxPrice != null) {
+			pageProducts = productRepo.findByPriceBetween(minPrice, maxPrice, pageDetails);
+		} else if (minPrice != null) {
+			pageProducts = productRepo.findByPriceGreaterThanEqual(minPrice, pageDetails);
+		} else if (maxPrice != null) {
+			pageProducts = productRepo.findByPriceLessThanEqual(maxPrice, pageDetails);
+		} else {
+			pageProducts = productRepo.findAll(pageDetails);
+		}
 
-		List<ProductDTO> productDTOs = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
+		List<ProductDTO> productDTOs = pageProducts.stream().map(product -> modelMapper.map(product, ProductDTO.class))
 				.collect(Collectors.toList());
 
 		ProductResponse productResponse = new ProductResponse();
