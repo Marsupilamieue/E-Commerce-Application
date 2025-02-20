@@ -3,15 +3,15 @@ package com.app.controllers;
 import java.util.List;
 
 import com.app.entites.Address;
-import com.app.payloads.AddressDTO;
+import com.app.exceptions.APIException;
+import com.app.payloads.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.app.config.AppConstants;
-import com.app.payloads.OrderDTO;
-import com.app.payloads.OrderResponse;
 import com.app.services.OrderService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,9 +28,15 @@ public class OrderController {
 	public ResponseEntity<OrderDTO> orderProducts(
 			@PathVariable String email,
 			@PathVariable Long cartId,
-			@RequestBody(required = true) AddressDTO addressDTO
+			@RequestBody OrderRequestDTO orderRequest
 	) {
-		OrderDTO order = orderService.placeOrder(email, cartId, addressDTO);
+		OrderDTO order = orderService.placeOrder(
+				email,
+				cartId,
+				orderRequest.getPaymentMethod(),
+				orderRequest.getAddressDTO(),
+				orderRequest.getBankTransferDTO()
+		);
 		return new ResponseEntity<>(order, HttpStatus.CREATED);
 	}
 

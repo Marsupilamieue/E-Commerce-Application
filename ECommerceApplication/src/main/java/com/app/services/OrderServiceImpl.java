@@ -1,12 +1,11 @@
 package com.app.services;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.app.entites.*;
-import com.app.payloads.AddressDTO;
+import com.app.payloads.*;
 import com.app.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.app.exceptions.APIException;
 import com.app.exceptions.ResourceNotFoundException;
-import com.app.payloads.OrderDTO;
-import com.app.payloads.OrderItemDTO;
-import com.app.payloads.OrderResponse;
 
 import jakarta.transaction.Transactional;
 
@@ -53,88 +49,103 @@ public class OrderServiceImpl implements OrderService {
 	public UserService userService;
 
 	@Autowired
+	public BankRepo bankRepo;
+
+	@Autowired
 	public CartService cartService;
 
 	@Autowired
 	public ModelMapper modelMapper;
 
 	@Override
-	public OrderDTO placeOrder(String email, Long cartId, AddressDTO addressDTO) {
-
+	public OrderDTO placeOrder(String email, Long cartId, String paymentMethod, AddressDTO addressDTO, BankTransferDTO bankTransferDTO) {
 		Cart cart = cartRepo.findCartByEmailAndCartId(email, cartId);
 
 		if (cart == null) {
 			throw new ResourceNotFoundException("Cart", "cartId", cartId);
 		}
 
-
-		if (addressDTO == null) {
-			throw new APIException("Address is required for COD payment.");
+		if (!paymentMethod.equalsIgnoreCase("COD") && !paymentMethod.equalsIgnoreCase("BANK_TRANSFER")) {
+			throw new APIException("Invalid payment method. Only 'COD' and 'BANK_TRANSFER' are allowed.");
 		}
 
 		Order order = new Order();
-
 		order.setEmail(email);
 		order.setOrderDate(LocalDate.now());
-
 		order.setTotalAmount(cart.getTotalPrice());
 		order.setOrderStatus("Order Accepted !");
 
-		Address address = new Address();
-		address.setStreet(addressDTO.getStreet());
-		address.setBuildingName(addressDTO.getBuildingName());
-		address.setCity(addressDTO.getCity());
-		address.setState(addressDTO.getState());
-		address.setCountry(addressDTO.getCountry());
-		address.setPincode(addressDTO.getPincode());
+		if (paymentMethod.equalsIgnoreCase("COD")) {
+			if (addressDTO == null) {
+				throw new APIException("Address is required for COD payment.");
+			}
 
-		address = addressRepo.save(address);
-		order.setAddress(address);
+			Address address = new Address();
+			address.setStreet(addressDTO.getStreet());
+			address.setBuildingName(addressDTO.getBuildingName());
+			address.setCity(addressDTO.getCity());
+			address.setState(addressDTO.getState());
+			address.setCountry(addressDTO.getCountry());
+			address.setPincode(addressDTO.getPincode());
+
+			address = addressRepo.save(address);
+			order.setAddress(address);
+		}
+		System.out.println(bankTransferDTO);
+		Bank bank = null;
+		if (paymentMethod.equalsIgnoreCase("BANK_TRANSFER")) {
+			if (bankTransferDTO == null || bankTransferDTO.getBankName() == null) {
+				throw new APIException("Bank selection is required for BANK_TRANSFER payment.");
+			}
+
+			bank = bankRepo.findByName(bankTransferDTO.getBankName());
+			if (bank == null) {
+				throw new APIException("Unsupported bank: " + bankTransferDTO.getBankName());
+			}
+		}
 
 		Payment payment = new Payment();
 		payment.setOrder(order);
+		payment.setPaymentMethod(paymentMethod);
 
-		payment = paymentRepo.save(payment);
-
-		order.setPayment(payment);
-
-		Order savedOrder = orderRepo.save(order);
-
-		List<CartItem> cartItems = cart.getCartItems();
-
-		if (cartItems.size() == 0) {
-			throw new APIException("Cart is empty");
+		if (paymentMethod.equalsIgnoreCase("BANK_TRANSFER")) {
+			payment.setBank(bank);
+		} else {
+			payment.setBank(null);
 		}
 
-		List<OrderItem> orderItems = new ArrayList<>();
+		payment = paymentRepo.save(payment);
+		order.setPayment(payment);
+		Order savedOrder = orderRepo.save(order);
 
-		for (CartItem cartItem : cartItems) {
+		List<OrderItem> orderItems = cart.getCartItems().stream().map(cartItem -> {
 			OrderItem orderItem = new OrderItem();
-
 			orderItem.setProduct(cartItem.getProduct());
 			orderItem.setQuantity(cartItem.getQuantity());
 			orderItem.setDiscount(cartItem.getDiscount());
 			orderItem.setOrderedProductPrice(cartItem.getProductPrice());
 			orderItem.setOrder(savedOrder);
+			return orderItem;
+		}).collect(Collectors.toList());
 
-			orderItems.add(orderItem);
-		}
-
-		orderItems = orderItemRepo.saveAll(orderItems);
+		orderItemRepo.saveAll(orderItems);
 
 		cart.getCartItems().forEach(item -> {
 			int quantity = item.getQuantity();
-
 			Product product = item.getProduct();
-
-			cartService.deleteProductFromCart(cartId, item.getProduct().getProductId());
-
+			cartService.deleteProductFromCart(cartId, product.getProductId());
 			product.setQuantity(product.getQuantity() - quantity);
 		});
 
 		OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
-		
-		orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
+		orderDTO.setOrderItems(orderItems.stream().map(item -> modelMapper.map(item, OrderItemDTO.class)).collect(Collectors.toList()));
+
+		if (paymentMethod.equalsIgnoreCase("BANK_TRANSFER")) {
+			BankTransferDTO bankTransferResponse = new BankTransferDTO();
+			bankTransferResponse.setBankName(bank.getName());
+			bankTransferResponse.setStoreAccountNumber(bank.getStoreAccountNumber());
+			orderDTO.setBankTransfer(bankTransferResponse);
+		}
 
 		return orderDTO;
 	}

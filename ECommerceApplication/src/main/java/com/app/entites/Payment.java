@@ -1,12 +1,6 @@
 package com.app.entites;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,4 +20,11 @@ public class Payment {
 
 	@OneToOne(mappedBy = "payment", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	private Order order;
+
+	@NotBlank(message = "Payment method is required")
+	private String paymentMethod;
+
+	@ManyToOne
+	@JoinColumn(name = "bank_id", nullable = true)
+	private Bank bank;
 }
